@@ -7,14 +7,12 @@ output:
                 keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
-```
+
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 unzip(zipfile="repdata%2Fdata%2Factivity.zip")
 myData <- read.csv("activity.csv")
 ```
@@ -23,19 +21,36 @@ myData <- read.csv("activity.csv")
 
 This section presents the histogram, the mean and the median of the total number of steps taken each day.
 
-```{r}
+
+```r
 totalStepsPerDay <- tapply(myData$steps, myData$date, FUN=sum, na.rm=TRUE)
 hist(totalStepsPerDay, breaks = 20, xlab="Total number of daily steps", main = "Histogram of Total number of daily steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 mean(totalStepsPerDay, na.rm=TRUE)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(totalStepsPerDay, na.rm=TRUE)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
 
 Time series plot of the average number of steps taken
 
-```{r}
 
+```r
 averageSteps <- aggregate(x = list(steps = myData$steps), 
                           by = list(interval = myData$interval), 
                           FUN=mean, na.rm=TRUE)
@@ -46,23 +61,39 @@ ggplot(data=averageSteps, aes(x=interval, y=steps)) +
     ylab("Average number of steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 Looking to identify the 5-minute interval that, on average, contains the maximum number of steps.
 
-```{r}
+
+```r
 averageSteps[which.max(averageSteps$steps),]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
 
 ## Imputing missing values
 
 Code to describe and show a strategy for imputing missing data
 
-```{r}
+
+```r
 ### Identify intervals having missing values. Missing values are coded as `NA`.
 missingData <- is.na(myData$steps)
 
 ### Display summary
 summary(missingData)
+```
 
+```
+##    Mode   FALSE    TRUE 
+## logical   15264    2304
+```
+
+```r
 ### Replace each missing value with the mean value of its 5-minute interval
 
 ### create function filler that keeps good values as they are and replace missing ones with the mean value of its 5-minute interval
@@ -83,18 +114,31 @@ newData$steps <- mapply(filler, newData$steps, newData$interval)
 
 Histogram of the total number of steps taken each day after missing values are imputed.
 
-```{r}
 
+```r
 newTotalStepsPerDay <- tapply(newData$steps, newData$date, FUN=sum, na.rm=TRUE)
 hist(newTotalStepsPerDay, 
      breaks = 20, 
      xlab="Total number of daily steps", 
      main = "Histogram of Total number of daily steps")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
 mean(newTotalStepsPerDay, na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(newTotalStepsPerDay, na.rm=TRUE)
+```
 
-
+```
+## [1] 10766.19
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -104,7 +148,8 @@ median(newTotalStepsPerDay, na.rm=TRUE)
 First, let's find the day of the week for each measurement in the dataset. In
 this part, we use the dataset with the filled-in values.
 
-```{r}
+
+```r
 ### create function for weekend identification
 isWeekend <- function(date) 
         {
@@ -125,7 +170,8 @@ newData$weekend <- sapply(newData$date, FUN = isWeekend)
 Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
 
 
-```{r}
+
+```r
 averages <- aggregate(steps ~ interval + weekend , data = newData, mean)
 
 ggplot(averages, aes(interval, steps)) + 
@@ -133,7 +179,7 @@ ggplot(averages, aes(interval, steps)) +
         facet_grid(ifelse(weekend == TRUE, "Weekend","Weekday") ~ .) +
         xlab("5 minutes interval") + 
         ylab("Number of steps")
-
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
