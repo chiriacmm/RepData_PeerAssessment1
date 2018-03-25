@@ -15,7 +15,7 @@ library(ggplot2)
 ## Loading and preprocessing the data
 
 ```{r}
-unzip(zipfile="repdata%2Fdata%2Factivity.zip")
+unzip(zipfile="activity.zip")
 myData <- read.csv("activity.csv")
 ```
 

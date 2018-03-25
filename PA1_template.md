@@ -13,7 +13,7 @@ output:
 
 
 ```r
-unzip(zipfile="repdata%2Fdata%2Factivity.zip")
+unzip(zipfile="activity.zip")
 myData <- read.csv("activity.csv")
 ```
 
