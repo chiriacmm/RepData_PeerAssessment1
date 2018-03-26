@@ -24,7 +24,10 @@ This section presents the histogram, the mean and the median of the total number
 
 ```r
 totalStepsPerDay <- tapply(myData$steps, myData$date, FUN=sum, na.rm=TRUE)
-hist(totalStepsPerDay, breaks = 20, xlab="Total number of daily steps", main = "Histogram of Total number of daily steps")
+
+hist(totalStepsPerDay, breaks = 20, 
+     xlab="Total number of daily steps", 
+     main = "Histogram of Total number of daily steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
@@ -55,10 +58,7 @@ averageSteps <- aggregate(x = list(steps = myData$steps),
                           by = list(interval = myData$interval), 
                           FUN=mean, na.rm=TRUE)
 
-ggplot(data=averageSteps, aes(x=interval, y=steps)) +
-    geom_line(colour = 'blue', size = 1) +
-    xlab("5 minutes interval") +
-    ylab("Average number of steps")
+plot(steps ~ interval, data = averageSteps, type = "l", xlab = "5 minutes interval", ylab = "Average number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
@@ -155,15 +155,17 @@ isWeekend <- function(date)
         {
                 dayOfWeek <- weekdays(date)
                 if (dayOfWeek %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
-                        return(FALSE)
+                        return("weekday")
                 else if (dayOfWeek %in% c("Saturday", "Sunday"))
-                        return(TRUE)
+                        return("weekend")
                 else
                         stop("Wrong data")
         }
-### Apply isWeekend function on newData by adding a new boolean column for weekend
+### Apply isWeekend function on newData by adding a new column for daytype
 newData$date <- as.Date(newData$date)
-newData$weekend <- sapply(newData$date, FUN = isWeekend)
+newData$daytype <- sapply(newData$date, FUN = isWeekend)
+
+newData$daytype = factor(newData$daytype, levels = c("weekday", "weekend"))
 ```
 
 
@@ -172,13 +174,12 @@ Panel plot comparing the average number of steps taken per 5-minute interval acr
 
 
 ```r
-averages <- aggregate(steps ~ interval + weekend , data = newData, mean)
+newAverageSteps = aggregate(steps ~ interval + daytype, newData, mean)
 
-ggplot(averages, aes(interval, steps)) + 
-        geom_line(colour = 'blue', size = 1) + 
-        facet_grid(ifelse(weekend == TRUE, "Weekend","Weekday") ~ .) +
-        xlab("5 minutes interval") + 
-        ylab("Number of steps")
+xyplot(steps ~ interval | factor(daytype), 
+       data = newAverageSteps, aspect = 1/2, type = "l", 
+       xlab = "5 minutes interval", 
+       ylab = "Number of steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
